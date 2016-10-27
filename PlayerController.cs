@@ -12,16 +12,17 @@ public class PlayerController : MonoBehaviour
 	public Gun[] guns;
 
 	int[] intialBullets;
-
 	int currentGun = 0;
+
+	GunUIUpdate gunUpdater;
 
 	void Start(){
 		intialBullets = new int[guns.Length];
 		enabled = true;
-		Debug.LogError ("the current gun is: " + guns [currentGun]);
-		for (int i = 0; i < guns.Length; i++) {
-			intialBullets [i] = guns [i].bullets;
-		}
+		intialBullets [0] = 30;
+		intialBullets [1] = 20;
+		intialBullets [2] = 35;
+		gunUpdater = GetComponent<GunUIUpdate> ();
 	}
 
 	void Update()
@@ -39,12 +40,17 @@ public class PlayerController : MonoBehaviour
 			Debug.LogError ("The amount of bullet is: " + guns [currentGun].bullets);
 			CmdFire();
 		}
+		if (guns [currentGun].bullets <= 0) {
+			gunUpdater.ReloadUpdate ();
+		}
 		if (guns [currentGun].bullets <= 0 && timer > guns[currentGun].reloadTime) {
 			guns [currentGun].bullets = intialBullets[currentGun];
 			timer = 0;
+			gunUpdater.UpdateUI (guns [currentGun].bullets, guns [currentGun].name);
 		}
 		if (Input.GetKeyDown (KeyCode.LeftShift)) {
 			ChangeGun ();
+			gunUpdater.UpdateUI (guns [currentGun].bullets, guns [currentGun].name);
 		}
 	}
 
@@ -63,10 +69,12 @@ public class PlayerController : MonoBehaviour
 //		bullet.setDamage (guns [currentGun].damage);
 
 		// Add velocity to the bullet
-		bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * 60;
+		bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * 6;
 
 		// Destroy the bullet after 2 seconds
 		Destroy(bullet, 2.0f);
+
+		gunUpdater.UpdateUI(guns [currentGun].bullets, guns [currentGun].name);
 	}
 
 	public Gun getGun(){
